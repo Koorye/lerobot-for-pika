@@ -1,0 +1,25 @@
+23.0011
+topic:
+camera/color/pikaDepthCamera_l 677 30.0375
+camera/color/pikaDepthCamera_r 677 30.0375
+camera/color/pikaFisheyeCamera_l 678 30.0442
+camera/color/pikaFisheyeCamera_r 678 30.044
+camera/color/camera_realsense_c 635 28.2442
+camera/depth/pikaDepthCamera_l 677 30.0375
+camera/depth/pikaDepthCamera_r 677 30.0375
+camera/depth/pikaDepthCamera_c 595 26.465
+localization/pose/pika_l 2826 125.124
+localization/pose/pika_r 2442 108.136
+gripper/encoder/pika_l 3388 150.058
+gripper/encoder/pika_r 3388 150.051
+imu/9axis/pika_l 3388 150.058
+imu/9axis/pika_r 3389 150.05
+config:
+camera/color/pikaDepthCamera_l 1
+camera/color/pikaDepthCamera_r 1
+camera/color/pikaFisheyeCamera_l 1
+camera/color/pikaFisheyeCamera_r 1
+camera/color/camera_realsense_c 0
+camera/depth/pikaDepthCamera_l 1
+camera/depth/pikaDepthCamera_r 1
+camera/depth/pikaDepthCamera_c 0
