@@ -2,54 +2,135 @@ import time
 from functools import cached_property
 from typing import Any
 
+from lerobot.errors import DeviceNotConnectedError
 from lerobot.robots.robot import Robot
 
 from piper_sdk import C_PiperInterface_V2
 
 from .configuration_piper import PiperConfig
+from ...cameras import make_cameras_from_configs
 
 
-class PiperRobot(Robot):
+class Piper(Robot):
 
     config_class = PiperConfig
     name = "piper"
 
     def __init__(self, config: PiperConfig):
         super().__init__(config)
+
         self.config = config
         self.arm = C_PiperInterface_V2(config.port)
+
+        self.config = config
+        self.init_state = config.init_ee_state
+        self.cameras = make_cameras_from_configs(config.cameras)
+    
+    @property
+    def _motors_ft(self) -> dict[str, type]:
+        return {
+            f'{each}.pos': float for each in ['joint_1', 'joint_2', 'joint_3', 'joint_4', 'joint_5', 'joint_6', 'gripper']
+        }
+
+    @property
+    def _cameras_ft(self) -> dict[str, tuple]:
+        cameras_features = {}
+        for cam_name, cam in self.cameras.items():
+            if hasattr(cam, 'observation_features'):
+                features = cam.observation_features
+                cameras_features.update({f"{cam_name}.{k}": v for k, v in features.items()})
+            else:
+                cameras_features[cam_name] = (cam.height, cam.width, 3)
+        return cameras_features
     
     @cached_property
     def observation_features(self) -> dict:
-        pass
+        return {**self._motors_ft, **self._cameras_ft}
 
     @cached_property
     def action_features(self) -> dict:
-        pass
+        return self._motors_ft
 
     @property
     def is_connected(self) -> bool:
-        return self.arm.__connected
+        return self.arm.__connected and all(self.camera.is_connected for self.camera in self.cameras.values())
     
     def connect(self):
         self.arm.ConnectPort()
         while not self.arm.EnablePiper():
             print("Waiting for Piper to enable...")
             time.sleep(0.1)
+        
+        self._set_ee_state(self.init_state)
+        print("Piper robot connected.")
+        
+        for cam in self.cameras.values():
+            cam.connect()
     
     def is_calibrated(self) -> bool:
         return True
     
     def calibrate(self):
-        pass
+        print("Piper robot does not require calibration.")
 
     def configure(self):
-        pass
+        print("Piper robot does not require configuration.")
+    
+    def _set_joint_state(self, state: list[int]):
+        self.arm.MotionCtrl_2(0x01, 0x01, 100, 0x00)
+        self.arm.JointCtrl(*state[:6])
+        self.arm.GripperCtrl(int(state[6]), 1000, 0x01, 0)
+    
+    def _get_joint_state(self) -> list[int]:
+        joint_state = self.arm.GetArmJointMsgs().joint_state
+        grip = self.arm.GetArmGripperMsgs().gripper_state.grippers_angle
+        return [
+            joint_state.joint_1, joint_state.joint_2, joint_state.joint_3,
+            joint_state.joint_4, joint_state.joint_5, joint_state.joint_6,
+            grip
+        ]
+    
+    def _set_ee_state(self, state: list[int]):
+        self.arm.MotionCtrl_2(0x01, 0x00, 100, 0x00)
+        self.arm.EndPoseCtrl(*state[:6])
+        self.arm.GripperCtrl(int(state[6]), 1000, 0x01, 0)
+
+    def _get_ee_state(self) -> list[int]:
+        end_pose = self.arm.GetArmEndPoseMsgs().end_pose
+        grip = self.arm.GetArmGripperMsgs().gripper_state.grippers_angle
+        return [
+            end_pose.X_axis, end_pose.Y_axis, end_pose.Z_axis,
+            end_pose.RX_axis, end_pose.RY_axis, end_pose.RZ_axis,
+            grip
+        ]
     
     def send_action(self, action: dict[str, Any]) -> dict[str, Any]:
-        pass
+        if not self.is_connected:
+            raise DeviceNotConnectedError(f"{self} is not connected.")
+        
+        self._set_joint_state([action[each] for each in self._motors_ft.keys()])
+        state = self._get_joint_state()
+        return {f"{k}.pos": v for k, v in zip(self._motors_ft.keys(), state)}
+    
+    def get_observation(self) -> dict[str, Any]:
+        if not self.is_connected:
+            raise DeviceNotConnectedError(f"{self} is not connected.")
+        
+        state = self._get_ee_state()
+        obs_dict = {f"{k}.pos": v for k, v in zip(self._motors_ft.keys(), state)}
+
+        for cam_key, cam in self.cameras.items():
+            outputs = cam.async_read()
+            if isinstance(outputs, dict):
+                for key, value in outputs.items():
+                    obs_dict[f"{cam_key}.{key}"] = value
+            else:
+                obs_dict[cam_key] = outputs
+        
+        return outputs
     
     def disconnect(self):
         while self.arm.DisconnectPort():
             print("Waiting for Piper to disconnect...")
             time.sleep(0.1)
+        print("Piper robot disconnected.")

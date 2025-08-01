@@ -1,17 +1,29 @@
+import logging
 import numpy as np
 import time
+from threading import Thread, Event, Lock
 from typing import Any
 
 from lerobot.cameras.camera import Camera
+from lerobot.errors import DeviceAlreadyConnectedError, DeviceNotConnectedError
 
 from pika import sense
 
 from .configuration_pika import PikaCameraConfig
 
 
+logger = logging.getLogger(__name__)
+
+
 class PikaCamera(Camera):
     def __init__(self, config: PikaCameraConfig):
         super().__init__(config)
+        self.thread: Thread | None = None
+        self.stop_event: Event | None = None
+        self.frame_lock: Lock = Lock()
+        self.latest_frame = None
+        self.new_frame_event: Event = Event()
+
         self.usb = config.usb
         self.fisheye_camera_index = config.fisheye_camera_index
         self.realsense_serial_number = config.realsense_serial_number
@@ -71,6 +83,66 @@ class PikaCamera(Camera):
             outputs['depth'] = depth_frame
         
         return outputs
+
+    def _read_loop(self):
+        while not self.stop_event.is_set():
+            try:
+                outputs = self.read()
+
+                with self.frame_lock:
+                    self.latest_frame = outputs
+                self.new_frame_event.set()
+
+            except DeviceNotConnectedError:
+                break
+            except Exception as e:
+                logger.warning(f"Error reading frame in background thread for {self}: {e}")
+
+    def _start_read_thread(self) -> None:
+        """Starts or restarts the background read thread if it's not running."""
+        if self.thread is not None and self.thread.is_alive():
+            self.thread.join(timeout=0.1)
+        if self.stop_event is not None:
+            self.stop_event.set()
+
+        self.stop_event = Event()
+        self.thread = Thread(target=self._read_loop, args=(), name=f"{self}_read_loop")
+        self.thread.daemon = True
+        self.thread.start()
+
+    def _stop_read_thread(self) -> None:
+        """Signals the background read thread to stop and waits for it to join."""
+        if self.stop_event is not None:
+            self.stop_event.set()
+
+        if self.thread is not None and self.thread.is_alive():
+            self.thread.join(timeout=2.0)
+
+        self.thread = None
+        self.stop_event = None
+
+    def async_read(self, timeout_ms: float = 200) -> np.ndarray:
+        if not self.is_connected:
+            raise DeviceNotConnectedError(f"{self} is not connected.")
+
+        if self.thread is None or not self.thread.is_alive():
+            self._start_read_thread()
+
+        if not self.new_frame_event.wait(timeout=timeout_ms / 1000.0):
+            thread_alive = self.thread is not None and self.thread.is_alive()
+            raise TimeoutError(
+                f"Timed out waiting for frame from camera {self} after {timeout_ms} ms. "
+                f"Read thread alive: {thread_alive}."
+            )
+
+        with self.frame_lock:
+            frame = self.latest_frame
+            self.new_frame_event.clear()
+
+        if frame is None:
+            raise RuntimeError(f"Internal error: Event set but no frame available for {self}.")
+
+        return frame
 
     def disconnect(self) -> None:
         self.sense.disconnect()

@@ -1,9 +1,14 @@
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 
-from lerobot.robots.config import RobotConfig
+from lerobot.cameras import CameraConfig
+from lerobot.robots import RobotConfig
 
 
 @RobotConfig.register_subclass("dummy")
 @dataclass
 class DummyConfig(RobotConfig):
-    pass
+    cameras: dict[str, CameraConfig] = field(default_factory=dict)
+    standardize: bool = True
+    control_mode: str = 'ee_absolute'
+    init_ee_state: list[int] = field(default_factory=lambda: [0, 0, 0, 0, 0, 0, 0])
+    visualize: bool = True
