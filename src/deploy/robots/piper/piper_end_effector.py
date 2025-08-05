@@ -21,7 +21,7 @@ class PiperEndEffector(Piper):
 
         self.standardization = get_standardization(self.name)
         self.transform = get_transform(config.control_mode, config.base_euler)
-        self.visualizer = get_visualizer(config.control_mode) if config.visualize else None
+        self.visualizer = get_visualizer(config.init_ee_state, 'ee_absolute') if config.visualize else None
     
     @property
     def action_features(self) -> dict[str, Any]:
@@ -54,3 +54,4 @@ class PiperEndEffector(Piper):
         if self.visualizer:
             state = self.standardization.input_transform(self._get_ee_state())
             self.visualizer.add(state)
+            self.visualizer.plot()

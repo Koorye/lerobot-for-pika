@@ -17,8 +17,10 @@ Example command:
 ```shell
 python scripts/deploy/robot_client.py \
     --robot.type=dummy \
-    --robot.cameras="{ front: {type: dummy, width: 640, height: 480, fps: 30} }" \
+    --robot.control_mode=ee_delta_gripper \
+    --robot.cameras="{ front: {type: dummy, width: 640, height: 480, fps: 5} }" \
     --robot.id=black \
+    --fps=5 \
     --task="do something" \
     --server_address=127.0.0.1:8080 \
     --policy_type=dummy \
@@ -384,7 +386,6 @@ class RobotClient:
         _performed_action = self.robot.send_action(
             self._action_tensor_to_action_dict(timed_action.get_action())
         )
-        self.robot.visualize()
         with self.latest_action_lock:
             self.latest_action = timed_action.get_timestep()
 

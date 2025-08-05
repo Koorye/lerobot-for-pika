@@ -21,6 +21,9 @@ class BaseTrajectoryVisualizer(ABC):
         }
         self.timestep = 0
 
+        plt.ion()  # Enable interactive mode for live updates
+        self.fig = plt.figure(figsize=(10, 10))
+
     @abstractmethod
     def add(self, state):
         pass
@@ -33,11 +36,11 @@ class BaseTrajectoryVisualizer(ABC):
             init_grip=grip
         )
 
-    def plot(self, figsize=(10, 8)):
+    def plot(self):
+        plt.clf()
         positions = np.array(self.trajectory['positions'])
         
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
+        ax = self.fig.add_subplot(111, projection='3d')
         
         ax.plot(positions[:, 0], positions[:, 1], positions[:, 2], 
                 'b-', linewidth=2)
@@ -66,7 +69,7 @@ class BaseTrajectoryVisualizer(ABC):
         ax.legend()
         plt.tight_layout()
         plt.axis('equal')
-        return fig, ax
+        plt.pause(1e-4)
 
 
 class MultiTrajectoriesVisualizer:
@@ -77,6 +80,7 @@ class MultiTrajectoriesVisualizer:
         ):
         self.names = names
         self.visualizers = visualizers
+        self.fig = plt.figure(figsize=(10, 10))
 
     def add(self, states):
         for name, state, converter in zip(self.names, states, self.visualizers):
@@ -86,9 +90,9 @@ class MultiTrajectoriesVisualizer:
         for name, state, converter in zip(self.names, states, self.visualizers):
             converter.reset(state)
 
-    def plot_trajectories_3d(self, figsize=(10, 8), names=None):
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
+    def plot_trajectories_3d(self, names=None):
+        plt.clf()
+        ax = self.fig.add_subplot(111, projection='3d')
         
         for name, converter in zip(self.names, self.converters):
             if names is not None:
@@ -122,7 +126,7 @@ class MultiTrajectoriesVisualizer:
         ax.legend()
         plt.tight_layout()
         plt.axis('equal')
-        return fig, ax
+        plt.pause(1e-4)
 
 
 class AbsoluteTrajectoryVisualizer(BaseTrajectoryVisualizer):
@@ -147,7 +151,8 @@ class DeltaGripperTrajectoryVisualizer(BaseTrajectoryVisualizer):
         rot = Rotation.from_euler('xyz', self.init_euler)
         self.T_world_current[:3, :3] = rot.as_matrix()
     
-    def add(self, position, euler, grip):
+    def add(self, state):
+        position, euler, grip = state[:3], state[3:6], state[6]
         dx, dy, dz = position
         drx, dry, drz = euler
         
@@ -175,7 +180,7 @@ class DeltaGripperTrajectoryVisualizer(BaseTrajectoryVisualizer):
 def get_visualizer(ee_state, control_mode, multi_arm=False) -> BaseTrajectoryVisualizer:
     if control_mode == 'ee_absolute':
         visualizer = AbsoluteTrajectoryVisualizer(ee_state)
-    elif control_mode == 'delta_gripper':
+    elif control_mode == 'ee_delta_gripper':
         visualizer = DeltaGripperTrajectoryVisualizer(ee_state)
     else:
         raise ValueError(f"Unsupported control mode: {control_mode}")

@@ -22,8 +22,8 @@ class DummyRobot(Robot):
         self.config = config
         self.cameras = make_cameras_from_configs(config.cameras)
         self.standardization = get_standardization(self.name) if config.standardize else None
-        self.transform = get_transform(config.control_mode)
-        self.visualizer = get_visualizer(config.init_ee_state, config.control_mode) if config.visualize else None
+        self.transform = get_transform(config.control_mode, config.base_euler)
+        self.visualizer = get_visualizer(config.init_ee_state, 'ee_absolute') if config.visualize else None
     
     @property
     def _motors_ft(self) -> dict[str, type]:
@@ -87,6 +87,7 @@ class DummyRobot(Robot):
 
         if self.visualizer:
             self.visualizer.add(new_state)
+            self.visualizer.plot()
     
     def get_observation(self) -> dict[str, Any]:
         if not self.is_connected:
@@ -115,9 +116,3 @@ class DummyRobot(Robot):
         self._is_connected = False
         for camera in self.cameras.values():
             camera.disconnect()
-
-    def visualize(self):
-        if self.visualizer:
-            self.visualizer.plot()
-        else:
-            print("No visualizer configured for DummyRobot.")

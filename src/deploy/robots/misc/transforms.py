@@ -36,7 +36,7 @@ class DeltaBaseToAbsoluteTransform(BaseTransform):
         absolute_pos = current_pos + delta_pos
         absolute_euler = current_euler + delta_euler
 
-        return list(np.concatenate((absolute_pos, absolute_euler, np.array([gripper])), axis=0))
+        return np.concatenate((absolute_pos, absolute_euler, np.array([gripper])), axis=0).tolist()
 
 
 class DeltaGripperToAbsoluteTransform(BaseTransform):
@@ -50,29 +50,26 @@ class DeltaGripperToAbsoluteTransform(BaseTransform):
 
         current_rot_matrix = euler_to_rotation_matrix(*current_euler)
 
-        if self.base_euler is not None:
-            align_rot_matrix = euler_to_rotation_matrix(*self.base_euler)
-            current_rot_matrix = current_rot_matrix @ align_rot_matrix.T
+        if self.base_euler is None:
+            absolute_pos = current_pos + current_rot_matrix @ delta_pos
+        else:
+            base_rot_matrix = euler_to_rotation_matrix(*self.base_euler)
+            absolute_pos = current_pos + base_rot_matrix.T @ current_rot_matrix @ delta_pos
 
         delta_rot_matrix = euler_to_rotation_matrix(*delta_euler)
         absolute_rot_matrix = current_rot_matrix @ delta_rot_matrix
 
-        if self.base_euler is not None:
-            absolute_rot_matrix = absolute_rot_matrix @ align_rot_matrix
-        
         absolute_euler = rotation_matrix_to_euler(absolute_rot_matrix)
 
-        absolute_pos = current_pos + current_rot_matrix.T @ delta_pos
-
-        return list(np.concatenate((absolute_pos, absolute_euler, np.array([gripper])), axis=0))
+        return np.concatenate((absolute_pos, absolute_euler, np.array([gripper])), axis=0).tolist()
 
 
 def get_transform(transform_type, base_euler=None):
     if transform_type == "ee_absolute":
         return AbsoluteTransform()
-    elif transform_type == "ee_delta_base_to_absolute":
+    elif transform_type == "ee_delta_base":
         return DeltaBaseToAbsoluteTransform()
-    elif transform_type == "ee_delta_gripper_to_absolute":
+    elif transform_type == "ee_delta_gripper":
         return DeltaGripperToAbsoluteTransform(base_euler=base_euler)
     else:
         raise ValueError(f"Unknown transform type: {transform_type}")

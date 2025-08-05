@@ -22,10 +22,10 @@ class DummyCamera(Camera):
         raise NotImplementedError("DummyCamera does not support method find_cameras")
 
     def read(self) -> np.ndarray:
-        return np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        return np.random.randint(0, 255, (self.height, self.width, 3), dtype=np.uint8)
 
     def async_read(self, timeout_ms: float = 200) -> np.ndarray:
-        return np.zeros((self.height, self.width, 3), dtype=np.uint8)
+        return np.random.randint(0, 255, (self.height, self.width, 3), dtype=np.uint8)
 
     def disconnect(self) -> None:
         print("Dummy camera disconnected")

@@ -235,11 +235,14 @@ class PolicyServer(services_pb2_grpc.AsyncInferenceServicer):
             return actions
 
         except Empty:  # no observation added to queue in obs_queue_timeout
+            import traceback
+            print(traceback.format_exc())
             return services_pb2.Empty()
 
         except Exception as e:
             self.logger.error(f"Error in StreamActions: {e}")
-
+            import traceback
+            print(traceback.format_exc())
             return services_pb2.Empty()
 
     def _obs_sanity_checks(self, obs: TimedObservation, previous_obs: TimedObservation) -> bool:
@@ -251,11 +254,11 @@ class PolicyServer(services_pb2_grpc.AsyncInferenceServicer):
             self.logger.debug(f"Skipping observation #{obs.get_timestep()} - Timestep predicted already!")
             return False
 
-        elif observations_similar(obs, previous_obs, lerobot_features=self.lerobot_features):
-            self.logger.debug(
-                f"Skipping observation #{obs.get_timestep()} - Observation too similar to last obs predicted!"
-            )
-            return False
+        # elif observations_similar(obs, previous_obs, lerobot_features=self.lerobot_features):
+        #     self.logger.debug(
+        #         f"Skipping observation #{obs.get_timestep()} - Observation too similar to last obs predicted!"
+        #     )
+        #     return False
 
         else:
             return True

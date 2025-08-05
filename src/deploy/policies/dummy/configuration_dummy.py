@@ -1,3 +1,4 @@
+import numpy as np
 from dataclasses import dataclass, field
 
 from lerobot.configs.policies import PreTrainedConfig
@@ -8,7 +9,7 @@ from lerobot.optim.optimizers import AdamWConfig
 @dataclass
 class DummyConfig(PreTrainedConfig):
     num_action_steps: int = 16
-    action: list[int] = field(default_factory=lambda: [1, 0, 0, 0, 0, 0, 0])
+    action: list[int] = field(default_factory=lambda: [0.01, 0, 0, 0, 0.01 * np.pi, 0.0 * np.pi, 0])
 
     def get_optimizer_preset(self) -> AdamWConfig:
         return AdamWConfig(
@@ -20,7 +21,8 @@ class DummyConfig(PreTrainedConfig):
         return None
 
     def validate_features(self) -> None:
-        return None
+        if not self.image_features and not self.env_state_feature:
+            raise ValueError("You must provide at least one image or the environment state among the inputs.")
 
     @property
     def observation_delta_indices(self) -> None:

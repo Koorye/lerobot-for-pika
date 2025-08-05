@@ -6,6 +6,7 @@ from torch import Tensor
 from typing import TypeVar
 
 from lerobot.configs.policies import PreTrainedConfig
+from lerobot.configs.types import FeatureType, PolicyFeature
 from lerobot.policies.pretrained import PreTrainedPolicy
 
 from .configuration_dummy import DummyConfig
@@ -46,9 +47,31 @@ class DummyPolicy(PreTrainedPolicy):
         **kwargs,
     ) -> T:
         print('DummyPolicy does not need method from_pretrained, return a new instance directly.')
-        if config is None:
-            config = DummyConfig()
-        return DummyPolicy(config, **kwargs)
+        try:
+            if config is None:
+                config = DummyConfig(
+                    input_features={
+                        "observation.images.front": PolicyFeature(
+                            type=FeatureType.VISUAL,
+                            shape=(3, 480, 640),
+                        ),
+                        "observation.state": PolicyFeature(
+                            type=FeatureType.STATE,
+                            shape=(7,),
+                        ),
+                    },
+                    output_features={
+                        "action": PolicyFeature(
+                            type=FeatureType.ACTION,
+                            shape=(7,),
+                        ),
+                    }
+                )
+            policy = DummyPolicy(config, **kwargs)
+        except:
+            import traceback
+            print(traceback.format_exc())
+        return policy
 
     def get_optim_params(self):
         return {}
@@ -68,7 +91,7 @@ class DummyPolicy(PreTrainedPolicy):
         self.eval()
         # (7,) -> (1, 1, 7) -> (B, N, 7)
         actions = self.action.unsqueeze(0).unsqueeze(0).repeat(
-            batch["observations"].shape[0], self.num_action_steps, 1
+            batch["observation.images.front"].shape[0], self.num_action_steps, 1
         )
         return actions
 
