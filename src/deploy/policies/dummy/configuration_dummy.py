@@ -9,7 +9,7 @@ from lerobot.optim.optimizers import AdamWConfig
 @dataclass
 class DummyConfig(PreTrainedConfig):
     num_action_steps: int = 16
-    action: list[int] = field(default_factory=lambda: [0.01, 0, 0, 0, 0.01 * np.pi, 0.0 * np.pi, 0])
+    action: list[int] = field(default_factory=lambda: [0.01, 0, 0, 0, 0.01 * np.pi, 0, 0])
 
     def get_optimizer_preset(self) -> AdamWConfig:
         return AdamWConfig(
