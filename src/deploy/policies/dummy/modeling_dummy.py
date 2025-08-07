@@ -15,6 +15,18 @@ T = TypeVar("T", bound="PreTrainedPolicy")
 
 
 class DummyPolicy(PreTrainedPolicy):
+    """
+    DummyPolicy is not a real policy with learning capabilities.
+    It is a placeholder that returns a fixed action.
+    It is used for testing and development purposes, simulating a policy that always outputs the same action.
+
+    Example:
+        ```python
+        policy = DummyPolicy.from_pretrained("dummy")
+        # actions: (Tensor) with shape (batch_size, chunk_size, action_len)
+        actions = policy.predict_action_chunk(batch)
+        ```
+    """
 
     config_class = DummyConfig
     name = "dummy"
@@ -46,6 +58,11 @@ class DummyPolicy(PreTrainedPolicy):
         strict: bool = False,
         **kwargs,
     ) -> T:
+        """
+        from_pretrained method of DummyPolicy does not load a pretrained model,
+        but rather returns a new instance of DummyPolicy with the provided configuration.
+        """
+
         print('DummyPolicy does not need method from_pretrained, return a new instance directly.')
         try:
             if config is None:
@@ -54,10 +71,6 @@ class DummyPolicy(PreTrainedPolicy):
                         "observation.images.front": PolicyFeature(
                             type=FeatureType.VISUAL,
                             shape=(3, 480, 640),
-                        ),
-                        "observation.state": PolicyFeature(
-                            type=FeatureType.STATE,
-                            shape=(7,),
                         ),
                     },
                     output_features={

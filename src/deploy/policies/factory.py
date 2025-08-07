@@ -99,6 +99,27 @@ def make_policy(
     env_cfg: EnvConfig | None = None,
     input_keys: list[str] | None = None,
 ) -> PreTrainedPolicy:
+    """Make an instance of a policy class.
+
+    This function exists because (for now) we need to parse features from either a dataset or an environment
+    in order to properly dimension and instantiate a policy for that dataset or environment.
+
+    Args:
+        cfg (PreTrainedConfig): The config of the policy to make. If `pretrained_path` is set, the policy will
+            be loaded with the weights from that path.
+        ds_meta (LeRobotDatasetMetadata | None, optional): Dataset metadata to take input/output shapes and
+            statistics to use for (un)normalization of inputs/outputs in the policy. Defaults to None.
+        env_cfg (EnvConfig | None, optional): The config of a gym environment to parse features from. Must be
+            provided if ds_meta is not. Defaults to None.
+
+    Raises:
+        ValueError: Either ds_meta or env and env_cfg must be provided.
+        NotImplementedError: if the policy.type is 'vqbet' and the policy device 'mps' (due to an incompatibility)
+
+    Returns:
+        PreTrainedPolicy: _description_
+    """
+    
     if bool(ds_meta) == bool(env_cfg):
         raise ValueError("Either one of a dataset metadata or a sim env must be provided.")
 

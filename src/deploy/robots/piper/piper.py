@@ -12,6 +12,27 @@ from ...cameras import make_cameras_from_configs
 
 
 class Piper(Robot):
+    """
+    Piper is a robot class for controlling the Piper robot using joint control.
+
+    Example:
+        ```python
+        config = PiperConfig(port="can1", cameras={"front": {"type": "dummy_camera", "height": 480, "width": 640, "fps": 30}})
+        robot = Piper(config)
+        robot.connect()
+
+        # get observation
+        observation = robot.get_observation()
+
+        # send action
+        action = {"joint_1.pos": 0, "joint_2.pos": 10, "joint_3.pos": 20, 
+                  "joint_4.pos": 30, "joint_5.pos": 40, "joint_6.pos": 50, 
+                  "gripper.pos": 60000}
+        robot.send_action(action)
+        
+        robot.disconnect()
+        ```
+    """
 
     config_class = PiperConfig
     name = "piper"

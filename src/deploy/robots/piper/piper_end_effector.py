@@ -9,6 +9,25 @@ from ..misc import get_standardization, get_transform, get_visualizer
 
 
 class PiperEndEffector(Piper):
+    """
+    PiperEndEffector is a robot class for controlling the Piper robot's end-effector using end-effector control.
+
+    Example:
+        ```python
+        config = PiperEndEffectorConfig(port="can1", cameras={"front": {"type": "dummy_camera", "height": 480, "width": 640, "fps": 30}})
+        robot = PiperEndEffector(config)
+        robot.connect()
+
+        # get observation
+        observation = robot.get_observation()
+
+        # send action
+        action = {"x": 0.1, "y": 0.2, "z": 0.3, "roll": 0.0, "pitch": 0.0, "yaw": 0.0, "gripper": 0.5}
+        robot.send_action(action)
+
+        robot.disconnect()
+        ```
+    """
 
     config_class = PiperEndEffectorConfig
     name = "piper_end_effector"

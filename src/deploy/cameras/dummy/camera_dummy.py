@@ -5,6 +5,23 @@ from lerobot.cameras.camera import Camera
 
 
 class DummyCamera(Camera):
+    """
+    Dummy camera implementation for testing purposes.
+    This camera returns random rgb images instead of capturing from hardware.
+
+    Example:
+        ```python
+        config = DummyCameraConfig(fps=30, width=640, height=480)
+        camera = DummyCamera(config)
+        camera.connect()
+
+        # frame: np.ndrray of shape (height, width, 3) with random values
+        frame = camera.read()
+
+        camera.disconnect()
+        ```
+    """
+    
     def __init__(self, config):
         super().__init__(config)
         self._is_connected = False

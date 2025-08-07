@@ -8,6 +8,10 @@ from lerobot.optim.optimizers import AdamWConfig
 @PreTrainedConfig.register_subclass("dummy")
 @dataclass
 class DummyConfig(PreTrainedConfig):
+    """
+    Configuration for the DummyPolicy, which is a placeholder policy that always returns a fixed action.
+    """
+
     num_action_steps: int = 16
     action: list[int] = field(default_factory=lambda: [0.01, 0, 0, 0, 0.01 * np.pi, 0.01 * np.pi, 0])
 

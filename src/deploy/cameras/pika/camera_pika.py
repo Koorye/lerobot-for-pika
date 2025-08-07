@@ -16,6 +16,32 @@ logger = logging.getLogger(__name__)
 
 
 class PikaCamera(Camera):
+    """
+    PikaCamera implementation for Agilex Pika cameras.
+    This camera supports both fisheye and realsense cameras, allowing for
+    simultaneous capture of color and depth frames.
+    This class is based on the Pika SDK, seeing https://github.com/agilexrobotics/pika_sdk
+
+    Example:
+        ```python
+        config = PikaCameraConfig(
+            usb=/dev/ttyUSB0,
+            fisheye_camera_index=0,
+            realsense_serial_number="1234567890",
+            fps=30, width=640, height=480,
+        )
+        camera = PikaCamera(config)
+        camera.connect()
+
+        # outputs: dict with keys 'fisheye', 'realsense', and 'depth'
+        # where 'fisheye' and 'realsense' are np.ndarrays of shape (height, width, 3)
+        # and 'depth' is a np.ndarray of shape (height, width)
+        outputs = camera.read()
+
+        frame = camera.read()
+        camera.disconnect()
+    """
+
     def __init__(self, config: PikaCameraConfig):
         super().__init__(config)
         self.thread: Thread | None = None

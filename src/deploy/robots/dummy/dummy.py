@@ -10,6 +10,27 @@ from ...cameras import make_cameras_from_configs
 
 
 class DummyRobot(Robot):
+    """
+    DummyRobot is a placeholder robot that simulates a robot's behavior without actual hardware.
+    It is used for testing and development purposes, simulating a robot that always outputs the same
+
+    Example:
+        ```python
+        config = DummyConfig(cameras={"front": {"type": "dummy_camera", "height": 480, "width": 640, "fps": 30}})
+        robot = DummyRobot(config)
+        robot.connect()
+        
+        # get observation
+        observation = robot.get_observation()
+
+        # send action
+        action = {"x": 0.1, "y": 0.2, "z": 0.3, "roll": 0.0, "pitch": 0.0, "yaw": 0.0, "gripper": 0.5}
+        robot.send_action(action)
+
+        robot.disconnect()
+        ```
+    """
+
     config_class = DummyConfig
     name = "dummy"
 
