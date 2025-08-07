@@ -1,5 +1,13 @@
-# from lerobot.policies.factory import 
+import logging
+
+from torch import nn
+
 from lerobot.configs.policies import PreTrainedConfig
+from lerobot.configs.types import FeatureType
+from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
+from lerobot.datasets.utils import dataset_to_policy_features
+from lerobot.envs.configs import EnvConfig
+from lerobot.envs.utils import env_to_policy_features
 from lerobot.policies.act.configuration_act import ACTConfig
 from lerobot.policies.diffusion.configuration_diffusion import DiffusionConfig
 from lerobot.policies.pi0.configuration_pi0 import PI0Config
@@ -83,3 +91,53 @@ def make_policy_config(policy_type: str, **kwargs) -> PreTrainedConfig:
         return DummyConfig(**kwargs)
     else:
         raise ValueError(f"Policy type '{policy_type}' is not available.")
+
+
+def make_policy(
+    cfg: PreTrainedConfig,
+    ds_meta: LeRobotDatasetMetadata | None = None,
+    env_cfg: EnvConfig | None = None,
+    input_keys: list[str] | None = None,
+) -> PreTrainedPolicy:
+    if bool(ds_meta) == bool(env_cfg):
+        raise ValueError("Either one of a dataset metadata or a sim env must be provided.")
+
+    if cfg.type == "vqbet" and cfg.device == "mps":
+        raise NotImplementedError(
+            "Current implementation of VQBeT does not support `mps` backend. "
+            "Please use `cpu` or `cuda` backend."
+        )
+
+    policy_cls = get_policy_class(cfg.type)
+
+    kwargs = {}
+    if ds_meta is not None:
+        features = dataset_to_policy_features(ds_meta.features)
+        kwargs["dataset_stats"] = ds_meta.stats
+    else:
+        if not cfg.pretrained_path:
+            logging.warning(
+                "You are instantiating a policy from scratch and its features are parsed from an environment "
+                "rather than a dataset. Normalization modules inside the policy will have infinite values "
+                "by default without stats from a dataset."
+            )
+        features = env_to_policy_features(env_cfg)
+
+    cfg.output_features = {key: ft for key, ft in features.items() if ft.type is FeatureType.ACTION}
+    cfg.input_features = {key: ft for key, ft in features.items() if key not in cfg.output_features}
+
+    if input_keys is not None:
+        cfg.input_features = {key: ft for key, ft in cfg.input_features.items() if key in input_keys}
+
+    kwargs["config"] = cfg
+
+    if cfg.pretrained_path:
+        kwargs["pretrained_name_or_path"] = cfg.pretrained_path
+        policy = policy_cls.from_pretrained(**kwargs)
+    else:
+        policy = policy_cls(**kwargs)
+
+    policy.to(cfg.device)
+    assert isinstance(policy, nn.Module)
+
+    return policy

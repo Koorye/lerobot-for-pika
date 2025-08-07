@@ -57,7 +57,7 @@ class DeltaGripperToAbsoluteTransform(BaseTransform):
             absolute_pos = current_pos + base_rot_matrix.T @ current_rot_matrix @ delta_pos
 
         delta_rot_matrix = euler_to_rotation_matrix(*delta_euler)
-        absolute_rot_matrix = current_rot_matrix @ delta_rot_matrix
+        absolute_rot_matrix = delta_rot_matrix @ current_rot_matrix
 
         absolute_euler = rotation_matrix_to_euler(absolute_rot_matrix)
 

@@ -23,7 +23,8 @@ class DummyRobot(Robot):
         self.cameras = make_cameras_from_configs(config.cameras)
         self.standardization = get_standardization(self.name) if config.standardize else None
         self.transform = get_transform(config.control_mode, config.base_euler)
-        self.visualizer = get_visualizer(config.init_ee_state, 'ee_absolute') if config.visualize else None
+        self.visualizer = get_visualizer(list(self._cameras_ft.keys()), ['arm'], [config.init_ee_state], 'ee_absolute') \
+                          if config.visualize else None
     
     @property
     def _motors_ft(self) -> dict[str, type]:
@@ -86,7 +87,9 @@ class DummyRobot(Robot):
         self.states.append(new_state)
 
         if self.visualizer:
-            self.visualizer.add(new_state)
+            observation = self.get_observation()
+            images = [observation[cam_key] for cam_key in self._cameras_ft.keys()]
+            self.visualizer.add(images, [new_state])
             self.visualizer.plot()
     
     def get_observation(self) -> dict[str, Any]:

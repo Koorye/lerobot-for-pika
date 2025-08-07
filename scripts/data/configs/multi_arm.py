@@ -58,6 +58,7 @@ class DataConfig:
     rotation_nonoop_threshold = math.pi / 180 # 1 degree
     gripper_nonoop_threshold = 1e-2 # 1mm
     transform_type = 'ee_delta_gripper'
+    # transform_type = 'ee_absolute'
 
     use_state = True
     state_name = 'observation.state'
