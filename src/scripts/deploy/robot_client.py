@@ -56,8 +56,8 @@ import torch
 #     so100_follower,
 #     so101_follower,
 # )
-from src.deploy.cameras import PikaCameraConfig
-from src.deploy.robots import (
+from src.cameras import PikaCameraConfig
+from src.robots import (
     DummyRobot, 
     DummyConfig, 
     Piper, 

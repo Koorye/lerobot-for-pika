@@ -2,7 +2,7 @@ import sys
 sys.path.append('.')
 
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
-from src.deploy.robots.misc import get_visualizer
+from src.robots.misc import get_visualizer
 
 
 dataset = LeRobotDataset(repo_id='Koorye/pika')

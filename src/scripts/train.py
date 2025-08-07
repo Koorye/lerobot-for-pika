@@ -54,8 +54,8 @@ from lerobot.utils.utils import (
 )
 from lerobot.utils.wandb_utils import WandBLogger
 
-from src.deploy.configs.train import TrainPipelineConfig
-from src.deploy.policies.factory import make_policy
+from src.configs.train import TrainPipelineConfig
+from src.policies.factory import make_policy
 
 
 def update_policy(

@@ -40,7 +40,7 @@ import grpc
 import torch
 
 # from lerobot.policies.factory import get_policy_class
-from src.deploy.policies.factory import get_policy_class
+from src.policies.factory import get_policy_class
 from lerobot.scripts.server.configs import PolicyServerConfig
 from lerobot.scripts.server.helpers import (
     FPSTracker,
