@@ -14,14 +14,10 @@
 
 """
 Example:
-```shell
-python src/lerobot/scripts/server/policy_server.py \
+python src/scripts/deploy/policy_server.py \
      --host=127.0.0.1 \
      --port=8080 \
-     --fps=30 \
-     --inference_latency=0.033 \
-     --obs_queue_timeout=1
-```
+     --fps=30
 """
 import sys
 sys.path.append('.')

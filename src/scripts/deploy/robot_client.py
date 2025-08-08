@@ -14,8 +14,10 @@
 
 """
 Example command:
-```shell
-python scripts/deploy/robot_client.py \
+
+1. Dummy robot & dummy policy:
+
+python src/scripts/deploy/robot_client.py \
     --robot.type=dummy \
     --robot.control_mode=ee_delta_gripper \
     --robot.cameras="{ front: {type: dummy, width: 640, height: 480, fps: 5} }" \
@@ -27,7 +29,23 @@ python scripts/deploy/robot_client.py \
     --pretrained_name_or_path=dummy \
     --actions_per_chunk=4 \
     --verify_robot_cameras=False
-```
+
+----------------------------------------------------------------------------------
+
+2. Dummy robot & ACT policy:
+
+python src/scripts/deploy/robot_client.py \
+    --robot.type=dummy \
+    --robot.control_mode=ee_delta_gripper \
+    --robot.cameras="{ left_wrist_fisheye: {type: dummy, width: 640, height: 480, fps: 5}, right_wrist_fisheye: {type: dummy, width: 640, height: 480, fps: 5} }" \
+    --robot.id=black \
+    --fps=5 \
+    --task="do something" \
+    --server_address=127.0.0.1:8080 \
+    --policy_type=act \
+    --pretrained_name_or_path=outputs/train/2025-08-07/17-15-07_act/checkpoints/last/pretrained_model \
+    --actions_per_chunk=100 \
+    --verify_robot_cameras=False
 """
 import sys
 sys.path.append('.')
