@@ -16,8 +16,8 @@
 Example:
 python src/scripts/deploy/policy_server.py \
      --host=127.0.0.1 \
-     --port=8080 \
-     --fps=30
+     --port=18080 \
+     --fps=5
 """
 import sys
 sys.path.append('.')

@@ -59,7 +59,7 @@ class Piper(Robot):
         for cam_name, cam in self.cameras.items():
             if hasattr(cam, 'observation_features'):
                 features = cam.observation_features
-                cameras_features.update({f"{cam_name}.{k}": v for k, v in features.items()})
+                cameras_features.update({f"{cam_name}_{k}": v for k, v in features.items()})
             else:
                 cameras_features[cam_name] = (cam.height, cam.width, 3)
         return cameras_features
@@ -138,7 +138,7 @@ class Piper(Robot):
             raise DeviceNotConnectedError(f"{self} is not connected.")
         
         state = self._get_ee_state()
-        obs_dict = {f"{k}.pos": v for k, v in zip(self._motors_ft.keys(), state)}
+        obs_dict = {f"{k}_pos": v for k, v in zip(self._motors_ft.keys(), state)}
 
         for cam_key, cam in self.cameras.items():
             outputs = cam.async_read()

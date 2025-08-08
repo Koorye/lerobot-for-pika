@@ -76,7 +76,7 @@ class BiPiper(Robot):
         for cam_name, cam in self.cameras.items():
             if hasattr(cam, 'observation_features'):
                 features = cam.observation_features
-                cameras_features.update({f"{cam_name}.{k}": v for k, v in features.items()})
+                cameras_features.update({f"{cam_name}_{k}": v for k, v in features.items()})
             else:
                 cameras_features[cam_name] = (cam.height, cam.width, 3)
         return cameras_features

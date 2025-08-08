@@ -1,3 +1,10 @@
+"""
+This script processes Pika2LeRobot data using the PikaDataProcessor.
+
+Example command:
+python src/scripts/data/pika2lerobot.py --source_data_roots /path/to/data1 /path/to/data2
+"""
+
 import sys
 sys.path.append('.')
 

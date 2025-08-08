@@ -1,3 +1,15 @@
+"""
+This script evaluates a policy on a dataset from the LeRobot repository.
+
+Example command:
+python src/scripts/data/evaluate_policy.py \
+    --repo_id=lerobot/pika \
+    --policy=act \
+    --pretrained=path/to/pretrained/checkpoint \
+    --device=cuda \
+    --actions_per_chunk=16
+"""
+
 import sys
 sys.path.append('.')
 

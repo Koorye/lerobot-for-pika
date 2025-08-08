@@ -21,7 +21,7 @@ class BiPiperConfig(RobotConfig):
     port_left: str
     port_right: str
     cameras: dict[str, CameraConfig] = field(default_factory=dict)
-    init_ee_state: list[int] = field(default_factory=lambda: [100000, 0, 300000, 0, 0, 0, 60000])
+    init_ee_state: list[int] = field(default_factory=lambda: [100000, 0, 300000, 0, 90000, 0, 60000])
 
 
 @RobotConfig.register_subclass("bi_piper_end_effector")

@@ -17,6 +17,7 @@ Example command:
 
 1. Dummy robot & dummy policy:
 
+```python
 python src/scripts/deploy/robot_client.py \
     --robot.type=dummy \
     --robot.control_mode=ee_delta_gripper \
@@ -24,16 +25,18 @@ python src/scripts/deploy/robot_client.py \
     --robot.id=black \
     --fps=5 \
     --task="do something" \
-    --server_address=127.0.0.1:8080 \
+    --server_address=127.0.0.1:18080 \
     --policy_type=dummy \
     --pretrained_name_or_path=dummy \
     --actions_per_chunk=4 \
     --verify_robot_cameras=False
+```
 
 ----------------------------------------------------------------------------------
 
 2. Dummy robot & ACT policy:
 
+```python
 python src/scripts/deploy/robot_client.py \
     --robot.type=dummy \
     --robot.control_mode=ee_delta_gripper \
@@ -41,7 +44,26 @@ python src/scripts/deploy/robot_client.py \
     --robot.id=black \
     --fps=5 \
     --task="do something" \
-    --server_address=127.0.0.1:8080 \
+    --server_address=127.0.0.1:18080 \
+    --policy_type=act \
+    --pretrained_name_or_path=outputs/train/2025-08-07/17-15-07_act/checkpoints/last/pretrained_model \
+    --actions_per_chunk=100 \
+    --verify_robot_cameras=False
+```
+
+3. Multi-arm Piper end effector robot & ACT policy:
+```python
+python src/scripts/deploy/robot_client.py \
+    --robot.type=bi_piper_end_effector \
+    --robot.port_left=can_left \
+    --robot.port_right=can_right \
+    --robot.cameras="{ left_wrist: {type: pika, usb: /dev/usbtty0, fisheye_camera_index: 0, width: 640, height: 480, fps: 5}, right_wrist: {type: pika, usb: /dev/usbtty1, fisheye_camera_index: 1, width: 640, height: 480, fps: 5} }" \
+    --robot.init_ee_state="[100000, 0, 300000, 0, 120000, 0, 60000]" \
+    --robot.control_mode=ee_delta_gripper \
+    --robot.id=black \
+    --fps=5 \
+    --task="do something" \
+    --server_address=127.0.0.1:18080 \
     --policy_type=act \
     --pretrained_name_or_path=outputs/train/2025-08-07/17-15-07_act/checkpoints/last/pretrained_model \
     --actions_per_chunk=100 \

@@ -1,3 +1,10 @@
+"""
+This script visualizes samples from a dataset stored in a specified repository.
+
+Example command:
+python src/scripts/data/visualize_dataset.py --repo_id=lerobot/pika
+"""
+
 import argparse
 import sys
 sys.path.append('.')
