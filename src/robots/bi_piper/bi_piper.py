@@ -11,6 +11,34 @@ from ...cameras import make_cameras_from_configs
 
 
 class BiPiper(Robot):
+    """
+    BiPiper is a robot class for controlling the BiPiper robot using joint control.
+
+    Example:
+        ```python
+        config = BiPiperConfig(
+            port_left="can1",
+            port_right="can2",
+            cameras={"front": {"type": "dummy_camera", "height": 480, "width": 640, "fps": 30}}
+        )
+        robot = BiPiper(config)
+        robot.connect()
+
+        # get observation
+        observation = robot.get_observation()
+
+        # send action
+        action = {
+            "left_joint_1.pos": 0, "left_joint_2.pos": 10, "left_joint_3.pos": 20,
+            "left_joint_4.pos": 30, "left_joint_5.pos": 40, "left_joint_6.pos": 50, "left_gripper.pos": 60000,
+            "right_joint_1.pos": 0, "right_joint_2.pos": 10, "right_joint_3.pos": 20,
+            "right_joint_4.pos": 30, "right_joint_5.pos": 40, "right_joint_6.pos": 50, "right_gripper.pos": 60000
+        }
+        robot.send_action(action)
+
+        robot.disconnect()
+        ```
+    """
 
     config_class = BiPiperConfig
     name = "bi_piper"

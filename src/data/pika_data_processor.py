@@ -13,6 +13,34 @@ def load_sync(file_path):
 
 
 class PikaDataProcessor(DummyDataProcessor):
+    """
+    A data processor for Pika dataset, inheriting from DummyDataProcessor.
+    This processor is designed to handle the specific structure and requirements of the Pika dataset.
+    It processes episodes by loading images, actions, and instructions, and applies transformations as specified in the configuration.
+
+    Attributes:
+        config: DataProcessorConfig instance containing the configuration for the dataset generation.
+                (seeing `src/data/configuration_data_processor.py` for details)
+    
+    Examples:
+        ```python
+        config = DataProcessorConfig(
+            source_data_roots=['/path/to/pika/data'],
+            rgb_dirs=['camera/color/camera_realsense_c'],
+            rgb_names=['observation.images.front'],
+            action_dirs=['localization/pose/pika_l'],
+            action_keys_list=[['x', 'y', 'z', 'roll', 'pitch', 'yaw']],
+            use_depth=False,
+            use_state=False,
+            transform_type='ee_absolute',
+            repo_id='lerobot/pika',
+        )
+        processor = PikaDataProcessor(config)
+        # This will create a dataset with raw pika data and save it to the specified repo_id in the default cache directory.
+        processor.process_data()
+        ```
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

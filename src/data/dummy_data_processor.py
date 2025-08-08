@@ -14,6 +14,7 @@ except:
     from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
     _LEROBOT_VERSION = '2.0'
 
+from .configuration_data_processor import DataProcessorConfig
 from .misc.images import load_image
 from .misc.transforms import get_transform
 
@@ -23,7 +24,35 @@ def get_lerobot_default_root():
 
 
 class DummyDataProcessor(object):
-    def __init__(self, config):
+    """
+    A dummy data processor for creating a LeRobot dataset with dummy data.
+    This processor generates random images and actions, simulating a dataset for testing purposes.
+    It supports both single-arm and dual-arm configurations, with options for depth images and state information.
+
+    Attributes:
+        config: DataProcessorConfig instance containing the configuration for the dataset generation.
+                (seeing `src/data/configuration_data_processor.py` for details)
+    
+    Examples:
+        ```python
+        config = DataProcessorConfig(
+            source_data_roots=['/path/to/source/data'],
+            rgb_dirs=['camera/color/camera_realsense_c'],
+            rgb_names=['observation.images.front'],
+            action_dirs=['localization/pose/pika_l'],
+            action_keys_list=[['x', 'y', 'z', 'roll', 'pitch', 'yaw']],
+            use_depth=False,
+            use_state=False,
+            transform_type='ee_absolute',
+            repo_id='lerobot/pika',
+        )
+        processor = DummyDataProcessor(config)
+        # This will create a dataset with dummy data and save it to lerobot/pika in the default cache directory.
+        processor.process_data()
+        ```
+    """
+
+    def __init__(self, config: DataProcessorConfig):
         self.config = config
 
         if self.config.overwrite:

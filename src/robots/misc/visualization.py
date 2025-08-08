@@ -1,3 +1,9 @@
+"""
+This module provides visualization tools for robot trajectories and actions.
+It includes classes for recording trajectories and visualizing them alongside images.
+It supports various transformations of end effector states, such as absolute and delta representations.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -5,6 +11,22 @@ from .transforms import get_transform
 
 
 class TrajectoryRecorder:
+    """
+    A class to record and transform end effector trajectories.
+    It supports various transformations such as absolute, delta base, and delta gripper.
+
+    Attributes:
+        init_state: Initial state of the end effector.
+        transform_type: Type of transformation to apply to the actions.
+    
+    Examples:
+        ```python
+        recorder = TrajectoryRecorder(init_state=np.array([0, 0, 0, 0, 0, 0, 0]), transform_type='ee_absolute')
+        recorder.add(np.array([0.1, 0.1, 0.1, 0, 0, 0, 1]))
+        recorder.add(np.array([0.2, 0.2, 0.2, 0, 0, 0, 1]))
+        ```
+    """
+
     def __init__(self, init_state, transform_type):
         self.init_state = init_state
         self.transform_type = transform_type
@@ -43,6 +65,33 @@ class TrajectoryRecorder:
 
 
 class Visualizer:
+    """
+    A class to visualize images and trajectories.
+    It creates a grid of images and plots the corresponding trajectories in 2D and 3D.
+
+    Attributes:
+        image_names: List of names for the images to be displayed.
+        traj_names: List of names for the trajectories to be plotted.
+        recoders: List of TrajectoryRecorder instances for each trajectory.
+        base_width: Width of the base figure.
+        base_height: Height of the base figure.
+    
+    Examples:
+        ```python
+        visualizer = Visualizer(
+            image_names=['front', 'left_wrist', 'right_wrist'],
+            traj_names=['left_arm', 'right_arm'],
+            recoders=[TrajectoryRecorder(init_state=np.zeros(7), transform_type='ee_absolute') for _ in range(2)],
+        )
+
+        for sample in dataset:
+            image1, image2, image3 = sample['observation.images.front'], sample['observation.images.left_wrist'], sample['observation.images.right_wrist']
+            action1, action2 = sample['actions'][:7], sample['actions'][7:]
+            visualizer.add(images=[image1, image2, image3], actions=[action1, action2])
+            visualizer.plot()
+        ```
+    """
+
     def __init__(self, image_names, traj_names, recoders, base_width=5, base_height=5):
         self.image_names = image_names
         self.traj_names = traj_names
@@ -135,7 +184,17 @@ class Visualizer:
             self.fig = None
 
 
-def get_visualizer(image_names, traj_names, init_states, transform_type='ee_absolute'):
+def get_visualizer(image_names: list, traj_names: list, init_states: list, transform_type: str='ee_absolute') -> Visualizer:
+    """
+    Factory function to create a Visualizer instance with specified image names, trajectory names, and initial states.
+
+    Args:
+        image_names (list): List of names for the images to be displayed.
+        traj_names (list): List of names for the trajectories to be plotted.
+        init_states (list): List of initial states for the TrajectoryRecorder instances, each state should be a list of length (7,).
+        transform_type (str): Type of transformation to apply to the actions. Defaults to 'ee_absolute'.
+    """
+
     recorders = [TrajectoryRecorder(init_state, transform_type) for init_state in init_states]
     visualizer = Visualizer(image_names, traj_names, recorders)
     return visualizer

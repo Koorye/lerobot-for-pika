@@ -1,3 +1,10 @@
+"""
+This module is used to convert absolute position coordinates in the world coordinate system 
+into various relative representations, including:
+1. Delta base coordinates (action is delta position and orientation relative to the robot base, x always points forward)
+2. Delta gripper coordinates (action is delta position and orientation relative to the robot gripper's local frame, x points gripper's forward direction)
+"""
+
 import numpy as np
 from abc import ABC, abstractmethod
 from scipy.spatial.transform import Rotation
@@ -12,6 +19,10 @@ def rotation_matrix_to_euler(matrix):
 
 
 class BaseTransform(ABC):
+    """
+    Base class for end effector transforms.
+    """
+
     def __init__(self):
         super().__init__()
     
@@ -24,11 +35,19 @@ class BaseTransform(ABC):
 
 
 class AbsoluteTransform(BaseTransform):
+    """
+    Transform that converts end effector actions to absolute world coordinates (no change).
+    """
+
     def __call__(self, end_effector_state, next_end_effector_state):
         return next_end_effector_state
 
 
 class AbsoluteToDeltaBaseTransform(BaseTransform):
+    """
+    Transform that converts absolute end effector state to delta base coordinates.
+    """
+
     def __call__(self, end_effector_state, next_end_effector_state):
         current_pos, current_euler = end_effector_state[:3], end_effector_state[3:6]
         next_pos, next_euler , gripper = next_end_effector_state[:3], next_end_effector_state[3:6], next_end_effector_state[6]
@@ -38,6 +57,10 @@ class AbsoluteToDeltaBaseTransform(BaseTransform):
 
 
 class AbsoluteToDeltaGripperTransform(BaseTransform):
+    """
+    Transform that converts absolute end effector state to delta gripper coordinates.
+    """
+    
     def __init__(self):
         super().__init__()
     

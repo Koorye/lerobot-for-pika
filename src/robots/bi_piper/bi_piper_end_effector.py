@@ -11,6 +11,34 @@ from ...cameras import make_cameras_from_configs
 
 
 class BiPiperEndEffector(Robot):
+    """
+    BiPiperEndEffector is a robot class for controlling the end effector of the BiPiper robot using end-effector control.
+
+    Example:
+        ```python
+        config = BiPiperEndEffectorConfig(
+            port_left="can1",
+            port_right="can2",
+            cameras={"front": {"type": "dummy_camera", "height": 480, "width": 640, "fps": 30}}
+        )
+        robot = BiPiperEndEffector(config)
+        robot.connect()
+
+        # get observation
+        observation = robot.get_observation()
+
+        # send action
+        action = {
+            "left_x": 0.1, "left_y": 0.2, "left_z": 0.3,
+            "left_roll": 0.0, "left_pitch": 0.0, "left_yaw": 0.0, "left_gripper": 0.5,
+            "right_x": 0.1, "right_y": 0.2, "right_z": 0.3,
+            "right_roll": 0.0, "right_pitch": 0.0, "right_yaw": 0.0, "right_gripper": 0.5
+        }
+        robot.send_action(action)
+
+        robot.disconnect()
+        ```
+    """
     
     config_class =  BiPiperEndEffectorConfig
     name = "bi_piper_end_effector"
